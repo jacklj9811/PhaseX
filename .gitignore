@@ -1,0 +1,41 @@
+# Ignore Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.ipynb_checkpoints
+.env
+.venv/
+venv/
+
+# Ignore MATLAB, binary and large data files
+*.mat
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.mp4
+*.mov
+*.avi
+*.eps
+*.pdf
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VSCode settings
+.vscode/
+
+# Logs
+*.log
+
+# Results, outputs
+/output/
+*.npy
+*.npz
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
