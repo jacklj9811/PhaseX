@@ -14,7 +14,7 @@ dimlen = 6;     % cube dimension
 n      = dimlen^3;
 m      = n;     % number of measurement vectors
 ks     = 2:2:26;
-gespar_1d = 0;  % set to 1 to run the 1D variant
+gespar_1d = 1;  % set to 1 to run the 1D variant
 verbose   = 0;
 F = fft(eye(n));
 
