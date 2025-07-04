@@ -1,5 +1,5 @@
 import numpy as np
-from .gespar3d import run_gespar3d
+from gespar3d import run_gespar3d
 
 
 def main():
