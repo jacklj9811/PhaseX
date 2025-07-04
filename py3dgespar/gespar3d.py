@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 
 def objective_fun(w, c, x):
@@ -143,3 +144,32 @@ def run_gespar3d(x, dimlen, k, m, max_t, snr, verbose=False):
     nmse = np.linalg.norm(x - matched) / np.linalg.norm(x)
     supp_match = len(np.intersect1d(np.nonzero(x)[0], np.nonzero(matched)[0]))
     return nmse, supp_match, matched
+
+
+def run_gespar3d_stats(x, dimlen, k, m, max_t, snr, verbose=False):
+    """Version of ``run_gespar3d`` that also reports runtime and iterations."""
+    start = time.time()
+    c = np.abs(np.fft.fftn(x.reshape(dimlen, dimlen, dimlen))) ** 2
+    cn = c + np.random.normal(scale=np.sqrt(np.mean(c) / (10 ** (snr / 10))),
+                              size=c.shape)
+    measurement_set = np.arange(m)
+    f_min = np.inf
+    x_best = np.zeros_like(x)
+    t_ind = 0
+    while t_ind <= max_t:
+        f_val, x_n, t_ind = greedysparse_rec_3d(
+            cn.ravel(), k, measurement_set, x.size // 2, t_ind, max_t, verbose
+        )
+        if f_val < f_min:
+            f_min = f_val
+            x_best = x_n
+            if f_min < 1e-4:
+                break
+    runtime = time.time() - start
+    matched = best_match_3d(x_best, x)
+    nmse = np.linalg.norm(x - matched) / np.linalg.norm(x)
+    supp_match = len(np.intersect1d(np.nonzero(x)[0], np.nonzero(matched)[0]))
+    if f_min >= 1e-4:
+        runtime = -runtime
+        t_ind = -t_ind
+    return nmse, supp_match, runtime, t_ind
