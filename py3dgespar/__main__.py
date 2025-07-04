@@ -41,7 +41,6 @@ def main():
     parser.add_argument("--plot", action="store_true",
                         help="show a 1D comparison plot of true vs recovered")
     args = parser.parse_args()
-
     dimlen = 4
     n = dimlen ** 3
     k = 3
