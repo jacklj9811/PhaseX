@@ -25,7 +25,6 @@ def main():
     parser = argparse.ArgumentParser(description="Demo for the Python 3D-GESPAR port")
     parser.add_argument("--plot", action="store_true", help="show a 3D scatter plot")
     args = parser.parse_args()
-
     dimlen = 4
     n = dimlen ** 3
     k = 3
