@@ -8,4 +8,12 @@ demonstration using:
 python -m py3dgespar
 ```
 
-The Python code provides basic functions for experimenting with the 3D-GESPAR approach.
+Use the `--plot` flag to display a simple 3D scatter visualization of the
+ground-truth and recovered volumes (requires `matplotlib`):
+
+```bash
+python -m py3dgespar --plot
+```
+
+The Python code provides basic functions for experimenting with the 3D-GESPAR
+approach.

@@ -142,4 +142,4 @@ def run_gespar3d(x, dimlen, k, m, max_t, snr, verbose=False):
     matched = best_match_3d(x_best, x)
     nmse = np.linalg.norm(x - matched) / np.linalg.norm(x)
     supp_match = len(np.intersect1d(np.nonzero(x)[0], np.nonzero(matched)[0]))
-    return nmse, supp_match
+    return nmse, supp_match, matched
