@@ -21,9 +21,25 @@ def plot_volume(true_x, est_x, dimlen):
     plt.show()
 
 
+def plot_flattened(true_x, est_x):
+    """Compare flattened amplitudes in a single 1D plot."""
+    true_flat = np.abs(true_x).ravel()
+    est_flat = np.abs(est_x).ravel()
+    idx = np.arange(len(true_flat))
+    fig, ax = plt.subplots()
+    ax.scatter(idx, true_flat, color="blue", label="True", marker=".")
+    ax.scatter(idx, est_flat, facecolors="none", edgecolors="red",
+               label="Recovered", marker="o")
+    ax.set_xlabel("Index")
+    ax.set_ylabel("Magnitude")
+    ax.legend()
+    plt.show()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Demo for the Python 3D-GESPAR port")
-    parser.add_argument("--plot", action="store_true", help="show a 3D scatter plot")
+    parser.add_argument("--plot", action="store_true",
+                        help="show a 1D comparison plot of true vs recovered")
     args = parser.parse_args()
     dimlen = 4
     n = dimlen ** 3
@@ -35,7 +51,7 @@ def main():
     print("NMSE:", nmse)
     print("Support match:", supp_match)
     if args.plot:
-        plot_volume(x, recovered, dimlen)
+        plot_flattened(x, recovered)
 
 
 if __name__ == "__main__":

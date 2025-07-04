@@ -8,8 +8,8 @@ demonstration using:
 python -m py3dgespar
 ```
 
-Use the `--plot` flag to display a simple 3D scatter visualization of the
-ground-truth and recovered volumes (requires `matplotlib`):
+Use the `--plot` flag to display a 1D comparison plot of the flattened
+ground-truth signal and the recovered result (requires `matplotlib`):
 
 ```bash
 python -m py3dgespar --plot
