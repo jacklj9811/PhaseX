@@ -7,7 +7,7 @@ def main():
     snr = np.inf
     max_t = 1000
     epoches = 30
-    dimlen = 6
+    dimlen = 7
     n = dimlen ** 3
     m = n
     ks = np.arange(2, 27, 2)
