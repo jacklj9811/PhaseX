@@ -16,4 +16,5 @@ python -m py3dgespar --plot
 ```
 
 The Python code provides basic functions for experimenting with the 3D-GESPAR
-approach.
+approach. The 1D variant assumes an even signal length; providing an odd length
+will raise a ``ValueError``.

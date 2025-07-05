@@ -7,7 +7,9 @@ def main():
     snr = np.inf
     max_t = 1000
     epoches = 30
-    dimlen = 7
+    # ``run_gespar1d`` expects an even signal length. The demo uses an even cube
+    # dimension so the flattened signal length is even as well.
+    dimlen = 6
     n = dimlen ** 3
     m = n
     ks = np.arange(2, 27, 2)

@@ -123,6 +123,32 @@ def gespar_1df(c, n, k, iterations, verbose, F, ac, noisy,
 
 
 def run_gespar1d(x, F, n, k, maxT, snr, verbose=False):
+    """Run one trial of the 1D GESPAR algorithm.
+
+    Parameters
+    ----------
+    x : ndarray
+        The ground-truth sparse signal.
+    F : ndarray
+        Discrete Fourier transform matrix of size ``n``.
+    n : int
+        Length of ``F``. Must be even.
+    k : int
+        Sparsity level of ``x``.
+    maxT : int
+        Maximum number of allowed replacements.
+    snr : float
+        Measurement SNR (``np.inf`` for noiseless).
+    verbose : bool, optional
+        If ``True``, print progress information.
+
+    Notes
+    -----
+    The implementation mirrors the original MATLAB code and relies on an even
+    signal length. If ``n`` is odd a ``ValueError`` is raised.
+    """
+    if n % 2 == 1:
+        raise ValueError("n must be even for the 1D variant")
     c = np.abs(np.fft.fft(x)) ** 2
     noise_std = 0.0 if np.isinf(snr) else np.sqrt(np.mean(c) / (10 ** (snr / 10)))
     cn = c + np.random.normal(scale=noise_std, size=c.shape)
