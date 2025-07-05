@@ -80,7 +80,10 @@ def gespar_1df(c, n, k, iterations, verbose, F, ac, noisy,
         idx = np.argsort(np.abs(x_k[supp0]))
         supp0 = supp0[idx]
         f_grad = grad_f(w, c, x_k)
-        off_supp = np.setdiff1d(np.arange(2 * n), supp0)
+        # Candidate indices correspond to the first ``n`` entries (MATLAB
+        # 1-based indexing uses ``1:n``). ``supp0`` is zero-based, so the
+        # set difference uses ``np.arange(n)`` here.
+        off_supp = np.setdiff1d(np.arange(n), supp0)
         off_supp = np.setdiff1d(off_supp, ac_off_supp - 1)
         off_supp = off_supp[np.argsort(-np.abs(f_grad[off_supp]))]
         improved = False
