@@ -7,15 +7,18 @@ def main():
     snr = np.inf
     max_t = 1000
     epoches = 30
-    # ``run_gespar1d`` expects an even signal length. The demo uses an even cube
-    # dimension so the flattened signal length is even as well.
+    # ``run_gespar1d`` only supports even signal lengths.  The demo defaults to
+    # an even cube dimension so the flattened signal length is even as well.
     dimlen = 6
     n = dimlen ** 3
     m = n
     ks = np.arange(2, 27, 2)
     gespar_1d = True
+    if n % 2 == 1:
+        print("WARNING: odd `dimlen` detected; skipping GESPAR-1D which requires an even length")
+        gespar_1d = False
     verbose = False
-    F = np.fft.fft(np.eye(n))
+    F = np.fft.fft(np.eye(n)) if gespar_1d else None
 
     hist_all = np.zeros((len(ks), 6))
     hist_all_1d = np.zeros_like(hist_all)

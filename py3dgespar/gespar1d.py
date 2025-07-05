@@ -130,9 +130,10 @@ def run_gespar1d(x, F, n, k, maxT, snr, verbose=False):
     x : ndarray
         The ground-truth sparse signal.
     F : ndarray
-        Discrete Fourier transform matrix of size ``n``.
+        Precomputed discrete Fourier transform matrix of shape ``(n, n)``.
     n : int
-        Length of ``F``. Must be even.
+        Signal length. Must be even because the algorithm relies on ``n // 2``
+        internally.
     k : int
         Sparsity level of ``x``.
     maxT : int
@@ -145,7 +146,8 @@ def run_gespar1d(x, F, n, k, maxT, snr, verbose=False):
     Notes
     -----
     The implementation mirrors the original MATLAB code and relies on an even
-    signal length. If ``n`` is odd a ``ValueError`` is raised.
+    signal length.  The provided DFT matrix ``F`` must correspond to the same
+    even ``n``.  If ``n`` is odd a ``ValueError`` is raised.
     """
     if n % 2 == 1:
         raise ValueError("n must be even for the 1D variant")
