@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 
 def objective_fun(w, c, x):
@@ -34,13 +35,23 @@ def gn_3d(support, c, n, x0, iterations, w):
     W = np.fft.fft(np.eye(dimlen))
     MM = []
     for ind_s in support:
-        alpha = int(np.ceil(ind_s / dimlen ** 2))
-        ind_s = ind_s - (alpha - 1) * dimlen ** 2
-        beta = int(np.ceil(ind_s / dimlen))
-        gamma = ind_s % dimlen
+        # ``support`` uses zero-based indexing whereas the MATLAB code assumes
+        # one-based indices. Adjust the index accordingly before computing the
+        # 3D coordinates used to form the DFT columns.
+        ind = ind_s + 1
+        alpha = int(np.ceil(ind / dimlen ** 2))
+        ind -= (alpha - 1) * dimlen ** 2
+        beta = int(np.ceil(ind / dimlen))
+        gamma = ind % dimlen
         if gamma == 0:
             gamma = dimlen
-        MM.append(np.kron(W[:, alpha - 1], np.kron(W[:, beta - 1], W[:, gamma - 1])))
+        # Convert back to zero-based column indices for NumPy
+        MM.append(
+            np.kron(
+                W[:, alpha - 1],
+                np.kron(W[:, beta - 1], W[:, gamma - 1])
+            )
+        )
     MM = np.stack(MM, axis=1)
     err_vec = []
     for _ in range(iterations):
@@ -92,7 +103,19 @@ def greedysparse_rec_3d(c, k, measurement_set, n, tind, max_t, verbose=False):
     iterations = 1000
     c = c[measurement_set]
     w = (1 + (np.random.rand(len(measurement_set)) < 0.5)).astype(float)
-    x_k, _ = gn_3d(supp, c, 2 * n, np.random.randn(k) + 1j * np.random.rand(k), iterations, w)
+    # ``n`` corresponds to the total signal length. The original MATLAB code
+    # doubled ``n`` when calling ``GN_3d`` since it assumed an even cube size
+    # and used ``numel(x)/2``.  When ``n`` is already the actual length (for
+    # odd cube sizes), doubling it results in a reshape error.  Use the given
+    # ``n`` directly so both even and odd dimensions are supported.
+    x_k, _ = gn_3d(
+        supp,
+        c,
+        n,
+        np.random.randn(k) + 1j * np.random.rand(k),
+        iterations,
+        w,
+    )
     f_min = wg_cost_3d(c, x_k, w)
     while True:
         supp = supp[np.argsort(np.abs(x_k[supp]))]
@@ -105,7 +128,7 @@ def greedysparse_rec_3d(c, k, measurement_set, n, tind, max_t, verbose=False):
                 supp_temp = supp.copy()
                 supp_temp[supp_temp == i] = j
                 tind += 1
-                x_temp, _ = gn_3d(supp_temp, c, 2 * n, x_k[supp_temp], iterations, w)
+                x_temp, _ = gn_3d(supp_temp, c, n, x_k[supp_temp], iterations, w)
                 f_temp = wg_cost_3d(c, x_temp, w)
                 if f_temp < f_min:
                     if verbose:
@@ -132,8 +155,17 @@ def run_gespar3d(x, dimlen, k, m, max_t, snr, verbose=False):
     f_min = np.inf
     x_best = np.zeros_like(x)
     t_ind = 0
+    n = x.size
     while t_ind <= max_t:
-        f_val, x_n, t_ind = greedysparse_rec_3d(cn.ravel(), k, measurement_set, x.size // 2, t_ind, max_t, verbose)
+        f_val, x_n, t_ind = greedysparse_rec_3d(
+            cn.ravel(),
+            k,
+            measurement_set,
+            n,
+            t_ind,
+            max_t,
+            verbose,
+        )
         if f_val < f_min:
             f_min = f_val
             x_best = x_n
@@ -143,3 +175,39 @@ def run_gespar3d(x, dimlen, k, m, max_t, snr, verbose=False):
     nmse = np.linalg.norm(x - matched) / np.linalg.norm(x)
     supp_match = len(np.intersect1d(np.nonzero(x)[0], np.nonzero(matched)[0]))
     return nmse, supp_match, matched
+
+
+def run_gespar3d_stats(x, dimlen, k, m, max_t, snr, verbose=False):
+    """Version of ``run_gespar3d`` that also reports runtime and iterations."""
+    start = time.time()
+    c = np.abs(np.fft.fftn(x.reshape(dimlen, dimlen, dimlen))) ** 2
+    cn = c + np.random.normal(scale=np.sqrt(np.mean(c) / (10 ** (snr / 10))),
+                              size=c.shape)
+    measurement_set = np.arange(m)
+    f_min = np.inf
+    x_best = np.zeros_like(x)
+    t_ind = 0
+    n = x.size
+    while t_ind <= max_t:
+        f_val, x_n, t_ind = greedysparse_rec_3d(
+            cn.ravel(),
+            k,
+            measurement_set,
+            n,
+            t_ind,
+            max_t,
+            verbose,
+        )
+        if f_val < f_min:
+            f_min = f_val
+            x_best = x_n
+            if f_min < 1e-4:
+                break
+    runtime = time.time() - start
+    matched = best_match_3d(x_best, x)
+    nmse = np.linalg.norm(x - matched) / np.linalg.norm(x)
+    supp_match = len(np.intersect1d(np.nonzero(x)[0], np.nonzero(matched)[0]))
+    if f_min >= 1e-4:
+        runtime = -runtime
+        t_ind = -t_ind
+    return nmse, supp_match, runtime, t_ind
