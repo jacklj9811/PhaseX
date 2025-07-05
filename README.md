@@ -16,5 +16,8 @@ python -m py3dgespar --plot
 ```
 
 The Python code provides basic functions for experimenting with the 3D-GESPAR
-approach. The 1D variant assumes an even signal length; providing an odd length
-will raise a ``ValueError``.
+approach.  The 3D implementation accepts odd or even cube dimensions.  The
+optional 1D variant uses half-length operations internally and therefore
+requires an even signal length.  If an odd cube size is chosen in the demo,
+disable the 1D comparison or use an even value instead.  Otherwise a
+``ValueError`` is raised.
