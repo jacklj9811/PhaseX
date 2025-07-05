@@ -103,7 +103,19 @@ def greedysparse_rec_3d(c, k, measurement_set, n, tind, max_t, verbose=False):
     iterations = 1000
     c = c[measurement_set]
     w = (1 + (np.random.rand(len(measurement_set)) < 0.5)).astype(float)
-    x_k, _ = gn_3d(supp, c, 2 * n, np.random.randn(k) + 1j * np.random.rand(k), iterations, w)
+    # ``n`` corresponds to the total signal length. The original MATLAB code
+    # doubled ``n`` when calling ``GN_3d`` since it assumed an even cube size
+    # and used ``numel(x)/2``.  When ``n`` is already the actual length (for
+    # odd cube sizes), doubling it results in a reshape error.  Use the given
+    # ``n`` directly so both even and odd dimensions are supported.
+    x_k, _ = gn_3d(
+        supp,
+        c,
+        n,
+        np.random.randn(k) + 1j * np.random.rand(k),
+        iterations,
+        w,
+    )
     f_min = wg_cost_3d(c, x_k, w)
     while True:
         supp = supp[np.argsort(np.abs(x_k[supp]))]
@@ -116,7 +128,7 @@ def greedysparse_rec_3d(c, k, measurement_set, n, tind, max_t, verbose=False):
                 supp_temp = supp.copy()
                 supp_temp[supp_temp == i] = j
                 tind += 1
-                x_temp, _ = gn_3d(supp_temp, c, 2 * n, x_k[supp_temp], iterations, w)
+                x_temp, _ = gn_3d(supp_temp, c, n, x_k[supp_temp], iterations, w)
                 f_temp = wg_cost_3d(c, x_temp, w)
                 if f_temp < f_min:
                     if verbose:
@@ -143,8 +155,17 @@ def run_gespar3d(x, dimlen, k, m, max_t, snr, verbose=False):
     f_min = np.inf
     x_best = np.zeros_like(x)
     t_ind = 0
+    n = x.size
     while t_ind <= max_t:
-        f_val, x_n, t_ind = greedysparse_rec_3d(cn.ravel(), k, measurement_set, x.size // 2, t_ind, max_t, verbose)
+        f_val, x_n, t_ind = greedysparse_rec_3d(
+            cn.ravel(),
+            k,
+            measurement_set,
+            n,
+            t_ind,
+            max_t,
+            verbose,
+        )
         if f_val < f_min:
             f_min = f_val
             x_best = x_n
@@ -166,9 +187,16 @@ def run_gespar3d_stats(x, dimlen, k, m, max_t, snr, verbose=False):
     f_min = np.inf
     x_best = np.zeros_like(x)
     t_ind = 0
+    n = x.size
     while t_ind <= max_t:
         f_val, x_n, t_ind = greedysparse_rec_3d(
-            cn.ravel(), k, measurement_set, x.size // 2, t_ind, max_t, verbose
+            cn.ravel(),
+            k,
+            measurement_set,
+            n,
+            t_ind,
+            max_t,
+            verbose,
         )
         if f_val < f_min:
             f_min = f_val
