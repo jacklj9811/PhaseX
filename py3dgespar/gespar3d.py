@@ -35,13 +35,23 @@ def gn_3d(support, c, n, x0, iterations, w):
     W = np.fft.fft(np.eye(dimlen))
     MM = []
     for ind_s in support:
-        alpha = int(np.ceil(ind_s / dimlen ** 2))
-        ind_s = ind_s - (alpha - 1) * dimlen ** 2
-        beta = int(np.ceil(ind_s / dimlen))
-        gamma = ind_s % dimlen
+        # ``support`` uses zero-based indexing whereas the MATLAB code assumes
+        # one-based indices. Adjust the index accordingly before computing the
+        # 3D coordinates used to form the DFT columns.
+        ind = ind_s + 1
+        alpha = int(np.ceil(ind / dimlen ** 2))
+        ind -= (alpha - 1) * dimlen ** 2
+        beta = int(np.ceil(ind / dimlen))
+        gamma = ind % dimlen
         if gamma == 0:
             gamma = dimlen
-        MM.append(np.kron(W[:, alpha - 1], np.kron(W[:, beta - 1], W[:, gamma - 1])))
+        # Convert back to zero-based column indices for NumPy
+        MM.append(
+            np.kron(
+                W[:, alpha - 1],
+                np.kron(W[:, beta - 1], W[:, gamma - 1])
+            )
+        )
     MM = np.stack(MM, axis=1)
     err_vec = []
     for _ in range(iterations):
