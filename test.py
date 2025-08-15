@@ -12,6 +12,7 @@ def load_volume(path: str, crop: Optional[int] = None) -> np.ndarray:
     path: str
         Path to the HDF5 file containing ``kspace`` data from fastMRI.
     crop: Optional[int]
+
         If provided, the volume is center-cropped to ``crop``^3 voxels.
 
     Returns
