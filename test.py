@@ -1,16 +1,18 @@
 import h5py
 import numpy as np
+from typing import Optional
 from py3dgespar import run_gespar3d_stats
 
 
-def load_volume(path: str, crop: int | None = None) -> np.ndarray:
+def load_volume(path: str, crop: Optional[int] = None) -> np.ndarray:
     """Load a knee MRI volume and optionally center-crop to a cube.
 
     Parameters
     ----------
     path: str
         Path to the HDF5 file containing ``kspace`` data from fastMRI.
-    crop: int | None
+    crop: Optional[int]
+
         If provided, the volume is center-cropped to ``crop``^3 voxels.
 
     Returns
